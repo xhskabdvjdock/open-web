@@ -23,13 +23,14 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const isEn = locale === "en";
   const featured = projects.filter((p) => p.featured);
   const siteName = settings.siteName || (isEn ? "Projects" : "أعمالي");
-  const siteTagline = settings.siteTagline || (isEn ? "Selected work." : "مجموعة مختارة من أعمالي.");
-  const aboutTitle = settings.aboutTitle || (isEn ? "About" : "نبذة");
+  const siteTagline = settings.siteTagline || "";
+  const aboutTitle = settings.aboutTitle || "";
   const aboutBody = settings.aboutBody || "";
+  const hasAbout = Boolean(aboutTitle || aboutBody);
 
   return (
     <div className="flex min-h-full flex-col">
-      <SiteHeader siteName={siteName} siteTagline={siteTagline} locale={locale} />
+      <SiteHeader siteName={siteName} siteTagline={siteTagline} locale={locale} hasAbout={hasAbout} />
 
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6">
         <section aria-labelledby="projects-heading" className="space-y-2">
@@ -45,7 +46,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             )}
           </div>
           <p className="max-w-2xl text-[15px] leading-8 text-gray-600 dark:text-gray-400">
-            {siteTagline} {t("taglineSuffix")}
+            {siteTagline ? `${siteTagline} ` : ""}{t("taglineSuffix")}
           </p>
         </section>
 
@@ -66,16 +67,23 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           <ProjectGrid projects={projects} categories={categories} technologies={technologies} />
         </section>
 
-        <section id="about" aria-labelledby="about-heading" className="mt-16 border-t border-gray-200 pt-10 dark:border-gray-800">
-          <h2 id="about-heading" className="text-lg font-bold text-gray-900 dark:text-gray-100">
-            {aboutTitle}
-          </h2>
-          {aboutBody.split("\n").map((para, i) => (
-            <p key={i} className="mt-3 max-w-3xl text-[15px] leading-8 text-gray-600 dark:text-gray-400">
-              {para}
-            </p>
-          ))}
-        </section>
+        {hasAbout && (
+          <section
+            id="about"
+            {...(aboutTitle ? { "aria-labelledby": "about-heading" } : {})}
+            className="mt-16 border-t border-gray-200 pt-10 dark:border-gray-800"
+          >            {aboutTitle && (
+              <h2 id="about-heading" className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                {aboutTitle}
+              </h2>
+            )}
+            {aboutBody.split("\n").map((para, i) => (
+              <p key={i} className="mt-3 max-w-3xl text-[15px] leading-8 text-gray-600 dark:text-gray-400">
+                {para}
+              </p>
+            ))}
+          </section>
+        )}
       </main>
 
       <SiteFooter siteName={siteName} locale={locale} />

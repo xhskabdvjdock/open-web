@@ -57,7 +57,7 @@ export default async function ProjectPage({
   const t = await getTranslations({ locale, namespace: "projectPage" });
   const [project, settings, all] = await Promise.all([
     getPublishedProjectBySlug(slug),
-    getSiteSettings(["siteName", "siteTagline"]),
+    getSiteSettings(["siteName", "siteTagline", "aboutTitle", "aboutBody"]),
     getPublishedProjects(),
   ]);
   if (!project) notFound();
@@ -69,8 +69,9 @@ export default async function ProjectPage({
     <div className="flex min-h-full flex-col">
       <SiteHeader
         siteName={settings.siteName || (isEn ? "Projects" : "أعمالي")}
-        siteTagline={settings.siteTagline || (isEn ? "Selected work." : "مجموعة مختارة من أعمالي.")}
+        siteTagline={settings.siteTagline || ""}
         locale={locale}
+        hasAbout={Boolean(settings.aboutTitle || settings.aboutBody)}
       />
       <main className="flex-1">
         <div className="mx-auto max-w-4xl px-4 pt-6 sm:px-6">

@@ -8,10 +8,12 @@ export async function SiteHeader({
   siteName,
   siteTagline,
   locale,
+  hasAbout,
 }: {
   siteName: string;
   siteTagline: string;
   locale: string;
+  hasAbout: boolean;
 }) {
   const t = await getTranslations({ locale, namespace: "header" });
   return (
@@ -19,7 +21,7 @@ export async function SiteHeader({
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         <Link href={localizedPath("/", locale)} className="flex items-baseline gap-2" aria-label={t("homeAria", { site: siteName })}>
           <span className="text-base font-bold text-gray-900 dark:text-gray-100">{siteName}</span>
-          <span className="hidden text-sm text-gray-500 sm:inline dark:text-gray-400">{siteTagline}</span>
+          {siteTagline && <span className="hidden text-sm text-gray-500 sm:inline dark:text-gray-400">{siteTagline}</span>}
         </Link>
         <nav aria-label={t("navAria")} className="flex items-center gap-1 text-sm">
           <Link href={localizedPath("/", locale)} className="rounded-md px-3 py-2 font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800">
@@ -28,9 +30,11 @@ export async function SiteHeader({
           <Link href={localizedPath("/projects", locale)} className="rounded-md px-3 py-2 font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800">
             {t("navAll")}
           </Link>
-          <Link href={localizedPath("/#about", locale)} className="rounded-md px-3 py-2 font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800">
-            {t("navAbout")}
-          </Link>
+          {hasAbout ? (
+            <Link href={localizedPath("/#about", locale)} className="rounded-md px-3 py-2 font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800">
+              {t("navAbout")}
+            </Link>
+          ) : null}
           <LocaleSwitcher />
           <ThemeToggle />
         </nav>

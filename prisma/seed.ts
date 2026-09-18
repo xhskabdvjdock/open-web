@@ -12,7 +12,7 @@ async function main() {
       await prisma.adminUser.create({ data: { email, passwordHash } });
       console.log(`Seeded admin user: ${email}`);
     } else {
-      console.log(`Admin user already exists: ${email}`);
+      console.log(`Admin user already exists: ${email} (not touching it — run "npm run admin:reset" to change login credentials)`);
     }
   } else {
     console.log("Skipped admin seed: set ADMIN_EMAIL and ADMIN_PASSWORD (min 8 chars) in .env");

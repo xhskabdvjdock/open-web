@@ -252,8 +252,7 @@
     "saved": "Settings saved and applied to the public site.",
     "failed": "Failed to save settings.",
     "save": "Save settings",
-    "saving": "Saving…",
-    "otherFallback": "Other"
+    "saving": "Saving…"
   },
   "password": {
     "title": "Change password",

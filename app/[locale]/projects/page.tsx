@@ -23,7 +23,7 @@ export default async function ProjectsPage({ params }: { params: Promise<{ local
   const t = await getTranslations({ locale, namespace: "projectsPage" });
   const [projects, settings, categories, technologies] = await Promise.all([
     getPublishedProjects(),
-    getSiteSettings(["siteName", "siteTagline"]),
+    getSiteSettings(["siteName", "siteTagline", "aboutTitle", "aboutBody"]),
     getAvailableCategories(),
     getAvailableTechnologies(),
   ]);
@@ -33,8 +33,9 @@ export default async function ProjectsPage({ params }: { params: Promise<{ local
     <div className="flex min-h-full flex-col">
       <SiteHeader
         siteName={settings.siteName || (isEn ? "Projects" : "أعمالي")}
-        siteTagline={settings.siteTagline || (isEn ? "Selected work." : "مجموعة مختارة من أعمالي.")}
+        siteTagline={settings.siteTagline || ""}
         locale={locale}
+        hasAbout={Boolean(settings.aboutTitle || settings.aboutBody)}
       />
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t("h1")}</h1>

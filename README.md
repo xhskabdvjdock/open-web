@@ -48,6 +48,17 @@ npm run dev
 Seed creates the admin user from `ADMIN_EMAIL` / `ADMIN_PASSWORD` and default site settings.
 Open `http://localhost:3000` for the public site and `http://localhost:3000/addweb` for admin.
 
+## Changing the admin login later
+
+`.env` is only read on first seed — editing it afterwards does not change the stored login.
+To apply new values: update `ADMIN_EMAIL` / `ADMIN_PASSWORD` in `.env`, then run:
+
+```bash
+npm run admin:reset
+```
+
+(Changing just the password is also possible anytime from `/addweb/settings` → Change password.)
+
 ## Internationalization
 
 - `i18n/routing.ts` — locales `ar` (default, no URL prefix) and `en` (`/en` prefix)

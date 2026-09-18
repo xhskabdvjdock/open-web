@@ -12,7 +12,8 @@
     "lint": "eslint",
     "db:push": "prisma db push",
     "db:seed": "npx tsx prisma/seed.ts",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "admin:reset": "npx tsx prisma/reset-admin.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",

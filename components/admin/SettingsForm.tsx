@@ -11,9 +11,9 @@ export function SettingsForm({ initial }: { initial: Record<string, string> }) {
   const locale = useLocale();
   const isEn = locale === "en";
   const [form, setForm] = useState({
-    siteName: initial.siteName || (isEn ? "Projects" : "أعمالي"),
+    siteName: initial.siteName || "",
     siteTagline: initial.siteTagline || "",
-    aboutTitle: initial.aboutTitle || (isEn ? "About" : "نبذة"),
+    aboutTitle: initial.aboutTitle || "",
     aboutBody: initial.aboutBody || "",
     categories: (() => {
       try {
@@ -37,11 +37,13 @@ export function SettingsForm({ initial }: { initial: Record<string, string> }) {
     startTransition(async () => {
       try {
         await updateSiteSettingsAction({
-          siteName: form.siteName.trim() || (isEn ? "Projects" : "أعمالي"),
+          // Save exactly what was typed — including empty values. Display
+          // fallbacks live in the public pages, not in saved data.
+          siteName: form.siteName.trim(),
           siteTagline: form.siteTagline.trim(),
-          aboutTitle: form.aboutTitle.trim() || (isEn ? "About" : "نبذة"),
+          aboutTitle: form.aboutTitle.trim(),
           aboutBody: form.aboutBody,
-          categories: JSON.stringify(categories.length > 0 ? categories : [t("otherFallback")]),
+          categories: JSON.stringify(categories),
         });
         setMessage(t("saved"));
       } catch {
@@ -53,13 +55,13 @@ export function SettingsForm({ initial }: { initial: Record<string, string> }) {
   return (
     <div className="space-y-4 rounded-lg border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
       <Field label={t("siteName")} htmlFor="siteName">
-        <Input id="siteName" value={form.siteName} onChange={(e) => setForm({ ...form, siteName: e.target.value })} />
+        <Input id="siteName" value={form.siteName} onChange={(e) => setForm({ ...form, siteName: e.target.value })} placeholder={isEn ? "Projects" : "أعمالي"} />
       </Field>
       <Field label={t("tagline")} htmlFor="tagline">
         <Input id="tagline" value={form.siteTagline} onChange={(e) => setForm({ ...form, siteTagline: e.target.value })} />
       </Field>
       <Field label={t("aboutTitle")} htmlFor="aboutTitle">
-        <Input id="aboutTitle" value={form.aboutTitle} onChange={(e) => setForm({ ...form, aboutTitle: e.target.value })} />
+        <Input id="aboutTitle" value={form.aboutTitle} onChange={(e) => setForm({ ...form, aboutTitle: e.target.value })} placeholder={isEn ? "About" : "نبذة"} />
       </Field>
       <Field label={t("aboutBody")} htmlFor="aboutBody">
         <Textarea id="aboutBody" rows={5} value={form.aboutBody} onChange={(e) => setForm({ ...form, aboutBody: e.target.value })} />

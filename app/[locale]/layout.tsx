@@ -18,9 +18,10 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  let siteName = locale === "en" ? "Projects" : "أعمالي";
+  const fallbackName = locale === "en" ? "Projects" : "أعمالي";
+  let siteName = fallbackName;
   try {
-    siteName = await getSiteSetting("siteName", siteName);
+    siteName = (await getSiteSetting("siteName", fallbackName)) || fallbackName;
   } catch {
     // DB may not exist at build time — fall back safely
   }
