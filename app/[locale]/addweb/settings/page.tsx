@@ -4,6 +4,7 @@ import { getSession } from "@/lib/auth/session";
 import { getSiteSettings } from "@/lib/projects";
 import { SettingsForm } from "@/components/admin/SettingsForm";
 import { PasswordForm } from "@/components/admin/PasswordForm";
+import { EmailForm } from "@/components/admin/EmailForm";
 
 export default async function SettingsPage({ params }: { params: Promise<{ locale: string }> }) {
   const session = await getSession();
@@ -19,6 +20,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ local
         <p className="text-sm text-gray-500 dark:text-gray-400">{t("sub")}</p>
       </div>
       <SettingsForm initial={settings} />
+      <EmailForm currentEmail={session.email} />
       <PasswordForm />
     </div>
   );

@@ -5,11 +5,15 @@ import arMessages from "@/messages/ar.json";
 import enMessages from "@/messages/en.json";
 
 export async function POST(req: Request) {
-  const session = await getSession();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
   const url = new URL(req.url);
   const locale = url.searchParams.get("locale") === "en" ? "en" : "ar";
+  const session = await getSession();
+  if (!session) {
+    return NextResponse.json(
+      { error: locale === "en" ? "Session expired. Please sign in again and retry." : "انتهت الجلسة. سجل الدخول مجدداً ثم أعد المحاولة." },
+      { status: 401 },
+    );
+  }
   // Server-side enforcement messages (the editor also validates client-side first).
   const fallbackFail =
     locale === "en" ? enMessages.editor.uploadFail : arMessages.editor.uploadFail;

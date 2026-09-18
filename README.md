@@ -33,7 +33,7 @@ In English mode the same pages live under `/en/addweb/*`:
 - `/addweb/projects` — list with edit / preview / delete / publish toggle / reorder (saved to DB)
 - `/addweb/new` — editor with live preview (same components as the public site)
 - `/addweb/[id]/edit` — same editor with existing data
-- `/addweb/settings` — site name, tagline, about, categories, change password
+- `/addweb/settings` — site name, tagline, about, categories, change email, change password
 
 ## Setup
 

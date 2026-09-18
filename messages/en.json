@@ -263,6 +263,22 @@
     "save": "Change password",
     "saving": "Saving…"
   },
+  "email": {
+    "title": "Change email address",
+    "current": "Current email",
+    "new": "New email",
+    "confirm": "Current password to confirm",
+    "changed": "Email changed. You are still signed in.",
+    "failed": "Failed to change email.",
+    "save": "Change email",
+    "saving": "Saving…",
+    "bothRequired": "New email and password are required.",
+    "invalid": "Invalid email format.",
+    "same": "This is already your email.",
+    "noAccount": "Account not found.",
+    "currentWrong": "Current password is incorrect.",
+    "taken": "This email is already in use."
+  },
   "shell": {
     "dashboard": "Dashboard",
     "projects": "Projects",
