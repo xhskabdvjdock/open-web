@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id                  String   @id @default(cuid())
+  slug                String   @unique
+  name                String
+  shortDescription    String
+  description         String   @default("")
+  imageUrl            String?
+  websiteUrl          String
+  githubUrl           String?
+  category            String   @default("Web App")
+  technologies        String   @default("[]")
+  additionalLinks     String   @default("[]")
+  status              String   @default("DRAFT")
+  featured            Boolean  @default(false)
+  sortOrder           Int      @default(0)
+  theme               String   @default("default")
+  accentColor         String   @default("#2563eb")
+  cardStyle           String   @default("default")
+  imageAspect         String   @default("16/9")
+  showTechnologies    Boolean  @default(true)
+  showCategory        Boolean  @default(true)
+  showGithub          Boolean  @default(true)
+  showWebsiteButton   Boolean  @default(true)
+  descriptionLength   String   @default("short")
+  featuredLayout      String   @default("standard")
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([status, sortOrder])
+  @@index([slug])
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+}
+
+model SiteSetting {
+  key   String @id
+  value String
+}
