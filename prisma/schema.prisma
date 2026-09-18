@@ -34,9 +34,22 @@ model Project {
   featuredLayout      String   @default("standard")
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
+  imageId             String?  @unique
+  image               ProjectImage? @relation(fields: [imageId], references: [id])
 
   @@index([status, sortOrder])
   @@index([slug])
+}
+
+// Binary image bytes stored directly in PostgreSQL, so uploads survive any
+// hosting (no local disk, no external bucket). Served via /api/images/[id].
+model ProjectImage {
+  id        String   @id @default(cuid())
+  data      Bytes
+  mime      String
+  size      Int
+  createdAt DateTime @default(now())
+  project   Project?
 }
 
 model AdminUser {

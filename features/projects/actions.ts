@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { requireSession } from "@/lib/auth/session";
 import { getProjectSchema } from "@/lib/validation/project";
-import { deleteImageByUrl } from "@/lib/storage";
+import { deleteImageByUrl, imageIdFromUrl } from "@/lib/storage";
 import arMessages from "@/messages/ar.json";
 import enMessages from "@/messages/en.json";
 
@@ -12,13 +12,15 @@ function vMsgs(locale: string) {
   return (locale === "en" ? enMessages : arMessages).validation;
 }
 
-function toDb(input: ReturnType<ReturnType<typeof getProjectSchema>["parse"]>) {
+function toDb(input: ReturnType<ReturnType<typeof getProjectSchema>["parse"]>, imageId: string | null) {
   return {
     name: input.name,
     slug: input.slug,
     shortDescription: input.shortDescription,
     description: input.description,
-    imageUrl: input.imageUrl || null,
+    // DB-hosted images are always served from their canonical URL.
+    imageUrl: imageId ? `/api/images/${imageId}` : input.imageUrl || null,
+    imageId,
     websiteUrl: input.websiteUrl,
     githubUrl: input.githubUrl || null,
     category: input.category,
@@ -41,6 +43,14 @@ function toDb(input: ReturnType<ReturnType<typeof getProjectSchema>["parse"]>) {
 }
 
 export type ActionResult = { ok: true; id: string; slug: string } | { ok: false; error: string; fieldErrors?: Record<string, string> };
+
+/** Resolve the image row behind an editor URL; null when absent/tampered (never throws FK errors). */
+async function resolveImageId(imageUrl: string | undefined): Promise<string | null> {
+  const id = imageIdFromUrl(imageUrl);
+  if (!id) return null;
+  const row = await prisma.projectImage.findUnique({ where: { id }, select: { id: true } });
+  return row ? row.id : null;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function parseInput(raw: any, locale: string) {
@@ -68,7 +78,8 @@ export async function createProjectAction(raw: unknown, locale: string): Promise
   const existing = await prisma.project.findUnique({ where: { slug: data.slug } });
   if (existing) return { ok: false, error: v.existsError, fieldErrors: { slug: v.slugInUse } };
 
-  const created = await prisma.project.create({ data: toDb(data) });
+  const imageId = await resolveImageId(data.imageUrl);
+  const created = await prisma.project.create({ data: toDb(data, imageId) });
   revalidatePath("/");
   revalidatePath("/projects");
   return { ok: true, id: created.id, slug: created.slug };
@@ -90,12 +101,12 @@ export async function updateProjectAction(id: string, raw: unknown, locale: stri
     return { ok: false, error: v.existsError, fieldErrors: { slug: v.slugInUse } };
   }
 
-  const oldImage = current.imageUrl;
-  const newImage = data.imageUrl || null;
-  const updated = await prisma.project.update({ where: { id }, data: toDb(data) });
+  const oldImageId = current.imageId;
+  const imageId = await resolveImageId(data.imageUrl);
+  const updated = await prisma.project.update({ where: { id }, data: toDb(data, imageId) });
 
-  if (oldImage && oldImage !== newImage) {
-    await deleteImageByUrl(oldImage);
+  if (oldImageId && oldImageId !== imageId) {
+    await deleteImageByUrl(`/api/images/${oldImageId}`);
   }
 
   revalidatePath("/");

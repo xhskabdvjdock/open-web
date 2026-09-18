@@ -1,15 +1,12 @@
-import { promises as fs } from "fs";
-import path from "path";
+import { prisma } from "@/lib/db";
 import arMessages from "@/messages/ar.json";
 import enMessages from "@/messages/en.json";
 
-const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads");
 const MAX_BYTES = 5 * 1024 * 1024;
 const ALLOWED_MIME = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
-
-export async function ensureUploadDir() {
-  await fs.mkdir(UPLOAD_DIR, { recursive: true });
-}
+// Uploads saved with a project are linked via Project.imageId; anything older
+// than this without a link is an abandoned upload and gets swept.
+const ORPHAN_AFTER_MS = 24 * 60 * 60 * 1000;
 
 export function validateImageFile(file: File, locale: string = "ar"): string | null {
   const t = (locale === "en" ? enMessages : arMessages).storage;
@@ -21,33 +18,47 @@ export function validateImageFile(file: File, locale: string = "ar"): string | n
   return null;
 }
 
-export async function saveUploadedImage(file: File): Promise<string> {
-  await ensureUploadDir();
-  const ext =
-    file.type === "image/png"
-      ? "png"
-      : file.type === "image/webp"
-        ? "webp"
-        : file.type === "image/gif"
-          ? "gif"
-          : "jpg";
-  const name = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}.${ext}`;
-  const bytes = Buffer.from(await file.arrayBuffer());
-  await fs.writeFile(path.join(UPLOAD_DIR, name), bytes);
-  return `/uploads/${name}`;
+/** Extract a ProjectImage id from a serving URL (/api/images/<id>). */
+export function imageIdFromUrl(imageUrl: string | null | undefined): string | null {
+  if (!imageUrl) return null;
+  const m = /^\/api\/images\/([a-z0-9]+)$/.exec(imageUrl.trim());
+  return m ? m[1] : null;
 }
 
+/** Store image bytes in PostgreSQL and return the public serving URL. */
+export async function saveUploadedImage(file: File): Promise<string> {
+  const bytes = Buffer.from(await file.arrayBuffer());
+  const created = await prisma.projectImage.create({
+    data: { data: bytes, mime: file.type, size: file.size },
+    select: { id: true },
+  });
+  return `/api/images/${created.id}`;
+}
+
+/** Delete the ProjectImage row behind a serving URL (no-op for anything else). */
 export async function deleteImageByUrl(imageUrl: string | null | undefined): Promise<void> {
-  if (!imageUrl || !imageUrl.startsWith("/uploads/")) return;
-  // Prevent path traversal
-  const base = path.basename(imageUrl);
-  if (base.includes("..")) return;
-  const full = path.join(UPLOAD_DIR, base);
-  // Ensure the resolved path stays inside the upload dir
-  if (!full.startsWith(UPLOAD_DIR)) return;
+  const id = imageIdFromUrl(imageUrl);
+  if (!id) return;
   try {
-    await fs.unlink(full);
-  } catch {
-    // File already gone — not an error for our purposes
+    // deleteMany: missing rows are fine (already gone), real failures still surface.
+    await prisma.projectImage.deleteMany({ where: { id } });
+  } catch (err) {
+    console.error(`Failed to delete project image ${id}:`, err);
+  }
+}
+
+/** Remove uploaded images that were never attached to a project (abandoned uploads). */
+export async function cleanupOrphanImages(): Promise<number> {
+  try {
+    const res = await prisma.projectImage.deleteMany({
+      where: {
+        project: null,
+        createdAt: { lt: new Date(Date.now() - ORPHAN_AFTER_MS) },
+      },
+    });
+    return res.count;
+  } catch (err) {
+    console.error("Failed to clean up orphan images:", err);
+    return 0;
   }
 }

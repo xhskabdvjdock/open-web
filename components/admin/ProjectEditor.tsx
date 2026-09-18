@@ -180,8 +180,15 @@ export function ProjectEditor({
       const fd = new FormData();
       fd.append("file", file);
       const res = await fetch(`/api/upload?locale=${locale}`, { method: "POST", body: fd });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? t("uploadFail"));
+      let data: { url?: string; error?: string } = {};
+      try {
+        data = await res.json();
+      } catch {
+        // Non-JSON error page (proxy / server crash) — fall through to status message
+      }
+      if (!res.ok || !data.url) {
+        throw new Error(data.error ? `${data.error} (${res.status})` : `${t("uploadFail")} (${res.status})`);
+      }
       URL.revokeObjectURL(localUrl);
       setForm((f) => ({ ...f, imageUrl: data.url as string }));
       setSaveState("unsaved");

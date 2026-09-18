@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/session";
-import { saveUploadedImage, validateImageFile } from "@/lib/storage";
+import { saveUploadedImage, validateImageFile, cleanupOrphanImages } from "@/lib/storage";
 import arMessages from "@/messages/ar.json";
 import enMessages from "@/messages/en.json";
 
@@ -37,6 +37,8 @@ export async function POST(req: Request) {
 
   try {
     const saved = await saveUploadedImage(file);
+    // Self-maintaining: sweep uploads abandoned before ever being saved.
+    await cleanupOrphanImages();
     return NextResponse.json({ url: saved });
   } catch {
     return NextResponse.json({ error: fallbackFail }, { status: 500 });

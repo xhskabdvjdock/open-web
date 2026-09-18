@@ -9,7 +9,9 @@ fully authenticated admin area for managing projects.
 - React + TypeScript
 - Prisma ORM + PostgreSQL (real database, no fake data; Supabase-ready)
 - Cookie session auth with `bcryptjs` + `jose` (single admin account, no public registration)
-- Local file storage under `public/uploads` (real uploads with type/size validation)
+- Real image storage: project images are stored as binary data directly in PostgreSQL
+  and served via `/api/images/[id]` (immutable caching) — no local disk, no external bucket,
+  survives any hosting. Abandoned uploads are swept automatically after 24h.
 - Tailwind CSS + `lucide-react` icons only (no emoji)
 - Arabic-first RTL interface using the Thmanyah Sans webfont (loaded from CDN; no font files are hosted in this repo per the font license)
 - Bilingual UI (Arabic default, English secondary) via `next-intl` with `as-needed` locale prefix
