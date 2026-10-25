@@ -19,6 +19,8 @@ export type Project = {
   description: string;
   imageUrl: string | null;
   websiteUrl: string;
+  websiteButtonTextAr: string;
+  websiteButtonTextEn: string;
   githubUrl: string | null;
   category: string;
   technologies: string[];
@@ -47,6 +49,8 @@ export type ProjectFormState = {
   description: string;
   imageUrl: string;
   websiteUrl: string;
+  websiteButtonTextAr: string;
+  websiteButtonTextEn: string;
   githubUrl: string;
   category: string;
   technologies: string[];
@@ -73,6 +77,8 @@ export const emptyProjectForm: ProjectFormState = {
   description: "",
   imageUrl: "",
   websiteUrl: "",
+  websiteButtonTextAr: "",
+  websiteButtonTextEn: "",
   githubUrl: "",
   category: "تطبيق ويب",
   technologies: [],

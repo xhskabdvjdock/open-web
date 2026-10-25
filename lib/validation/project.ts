@@ -59,6 +59,8 @@ export function getProjectSchema(m: ValidationMessages) {
     description: z.string().trim().min(20, m.description).max(8000),
     imageUrl: z.string().trim().max(2048).optional().or(z.literal("")),
     websiteUrl: z.string().trim().url(m.website).max(2048),
+    websiteButtonTextAr: z.string().trim().max(60).default(""),
+    websiteButtonTextEn: z.string().trim().max(60).default(""),
     githubUrl: urlField.optional().or(z.literal("")),
     category: z.string().trim().min(1, m.category).max(40),
     technologies: z.array(z.string().trim().min(1).max(30)).min(1, m.tech).max(20),

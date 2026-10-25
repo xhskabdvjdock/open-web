@@ -172,6 +172,8 @@
     "remove": "Remove",
     "secLinks": "Links",
     "website": "Website URL",
+    "websiteButtonTextAr": "Visit button text in Arabic",
+    "websiteButtonTextEn": "Visit button text in English",
     "github": "GitHub URL (optional)",
     "githubHint": "Leave empty to hide GitHub on the public site.",
     "addLinks": "Additional links",

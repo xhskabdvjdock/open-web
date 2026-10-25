@@ -47,7 +47,7 @@ export function ProjectDetailView({ project }: { project: Project }) {
               className="inline-flex h-10 items-center gap-2 rounded-md px-4 text-sm font-medium text-white"
               style={{ backgroundColor: project.accentColor }}
             >
-              {t("visit")} <ArrowUpRight className="h-4 w-4" aria-hidden />
+              {(locale === "en" ? project.websiteButtonTextEn : project.websiteButtonTextAr) || t("visit")} <ArrowUpRight className="h-4 w-4" aria-hidden />
             </a>
           )}
           {showGithub && (

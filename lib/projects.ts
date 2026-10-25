@@ -9,6 +9,8 @@ type DbProject = {
   description: string;
   imageUrl: string | null;
   websiteUrl: string;
+  websiteButtonTextAr: string;
+  websiteButtonTextEn: string;
   githubUrl: string | null;
   category: string;
   technologies: string;
@@ -66,6 +68,8 @@ export function mapProject(row: any): Project {
     description: r.description,
     imageUrl: r.imageUrl,
     websiteUrl: r.websiteUrl,
+    websiteButtonTextAr: r.websiteButtonTextAr ?? "",
+    websiteButtonTextEn: r.websiteButtonTextEn ?? "",
     githubUrl: r.githubUrl,
     category: r.category,
     technologies: parseStringArray(r.technologies ?? "[]"),

@@ -79,6 +79,8 @@ export function ProjectEditor({
       description: form.description || t("descPreviewPh"),
       imageUrl: form.imageUrl || null,
       websiteUrl: form.websiteUrl || "https://example.com",
+      websiteButtonTextAr: form.websiteButtonTextAr,
+      websiteButtonTextEn: form.websiteButtonTextEn,
       githubUrl: form.githubUrl || null,
       category: form.category || t("catFallback"),
       technologies: form.technologies,
@@ -343,6 +345,12 @@ export function ProjectEditor({
             <h2 id="links" className="text-sm font-bold text-gray-500 dark:text-gray-400">{t("secLinks")}</h2>
             <Field label={t("website")} htmlFor="website" error={errors.websiteUrl}>
               <Input id="website" dir="ltr" inputMode="url" value={form.websiteUrl} onChange={(e) => set("websiteUrl", e.target.value)} placeholder="https://example.com" />
+            </Field>
+            <Field label={t("websiteButtonTextAr")} htmlFor="websiteButtonTextAr">
+              <Input id="websiteButtonTextAr" value={form.websiteButtonTextAr} onChange={(e) => set("websiteButtonTextAr", e.target.value)} maxLength={60} />
+            </Field>
+            <Field label={t("websiteButtonTextEn")} htmlFor="websiteButtonTextEn">
+              <Input id="websiteButtonTextEn" dir="ltr" value={form.websiteButtonTextEn} onChange={(e) => set("websiteButtonTextEn", e.target.value)} maxLength={60} />
             </Field>
             <Field label={t("github")} htmlFor="github" hint={t("githubHint")} error={errors.githubUrl}>
               <Input id="github" dir="ltr" inputMode="url" value={form.githubUrl} onChange={(e) => set("githubUrl", e.target.value)} placeholder="https://github.com/you/repo" />

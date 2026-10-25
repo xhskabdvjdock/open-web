@@ -172,6 +172,8 @@
     "remove": "إزالة",
     "secLinks": "الروابط",
     "website": "رابط الموقع",
+    "websiteButtonTextAr": "نص زر زيارة الموقع بالعربية",
+    "websiteButtonTextEn": "نص زر زيارة الموقع بالإنجليزية",
     "github": "رابط GitHub (اختياري)",
     "githubHint": "اتركه فارغاً لإخفاء GitHub من الموقع العام.",
     "addLinks": "روابط إضافية",

@@ -33,6 +33,8 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
     description: project.description,
     imageUrl: project.imageUrl ?? "",
     websiteUrl: project.websiteUrl,
+    websiteButtonTextAr: project.websiteButtonTextAr,
+    websiteButtonTextEn: project.websiteButtonTextEn,
     githubUrl: project.githubUrl ?? "",
     category: project.category,
     technologies: project.technologies,

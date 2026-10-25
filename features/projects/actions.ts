@@ -22,6 +22,8 @@ function toDb(input: ReturnType<ReturnType<typeof getProjectSchema>["parse"]>, i
     imageUrl: imageId ? `/api/images/${imageId}` : input.imageUrl || null,
     imageId,
     websiteUrl: input.websiteUrl,
+    websiteButtonTextAr: input.websiteButtonTextAr,
+    websiteButtonTextEn: input.websiteButtonTextEn,
     githubUrl: input.githubUrl || null,
     category: input.category,
     technologies: JSON.stringify(input.technologies),
