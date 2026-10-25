@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { requireSession } from "@/lib/auth/session";
 import { getProjectSchema } from "@/lib/validation/project";
+import { getProjectButtonTextSettingKeys } from "@/lib/projects";
 import { deleteImageByUrl, imageIdFromUrl } from "@/lib/storage";
 import arMessages from "@/messages/ar.json";
 import enMessages from "@/messages/en.json";
@@ -22,8 +23,6 @@ function toDb(input: ReturnType<ReturnType<typeof getProjectSchema>["parse"]>, i
     imageUrl: imageId ? `/api/images/${imageId}` : input.imageUrl || null,
     imageId,
     websiteUrl: input.websiteUrl,
-    websiteButtonTextAr: input.websiteButtonTextAr,
-    websiteButtonTextEn: input.websiteButtonTextEn,
     githubUrl: input.githubUrl || null,
     category: input.category,
     technologies: JSON.stringify(input.technologies),
@@ -42,6 +41,25 @@ function toDb(input: ReturnType<ReturnType<typeof getProjectSchema>["parse"]>, i
     descriptionLength: input.descriptionLength,
     featuredLayout: input.featuredLayout,
   };
+}
+
+async function saveProjectButtonTexts(
+  projectId: string,
+  texts: { websiteButtonTextAr: string; websiteButtonTextEn: string },
+): Promise<void> {
+  const keys = getProjectButtonTextSettingKeys(projectId);
+  await prisma.$transaction([
+    prisma.siteSetting.upsert({
+      where: { key: keys.ar },
+      update: { value: texts.websiteButtonTextAr },
+      create: { key: keys.ar, value: texts.websiteButtonTextAr },
+    }),
+    prisma.siteSetting.upsert({
+      where: { key: keys.en },
+      update: { value: texts.websiteButtonTextEn },
+      create: { key: keys.en, value: texts.websiteButtonTextEn },
+    }),
+  ]);
 }
 
 export type ActionResult = { ok: true; id: string; slug: string } | { ok: false; error: string; fieldErrors?: Record<string, string> };
@@ -82,6 +100,7 @@ export async function createProjectAction(raw: unknown, locale: string): Promise
 
   const imageId = await resolveImageId(data.imageUrl);
   const created = await prisma.project.create({ data: toDb(data, imageId) });
+  await saveProjectButtonTexts(created.id, data);
   revalidatePath("/");
   revalidatePath("/projects");
   return { ok: true, id: created.id, slug: created.slug };
@@ -106,6 +125,7 @@ export async function updateProjectAction(id: string, raw: unknown, locale: stri
   const oldImageId = current.imageId;
   const imageId = await resolveImageId(data.imageUrl);
   const updated = await prisma.project.update({ where: { id }, data: toDb(data, imageId) });
+  await saveProjectButtonTexts(id, data);
 
   if (oldImageId && oldImageId !== imageId) {
     await deleteImageByUrl(`/api/images/${oldImageId}`);
@@ -123,6 +143,8 @@ export async function deleteProjectAction(id: string, locale: string): Promise<{
   const current = await prisma.project.findUnique({ where: { id } });
   if (!current) return { ok: false, error: v.notFound };
   await prisma.project.delete({ where: { id } });
+  const buttonTextKeys = getProjectButtonTextSettingKeys(id);
+  await prisma.siteSetting.deleteMany({ where: { key: { in: [buttonTextKeys.ar, buttonTextKeys.en] } } });
   await deleteImageByUrl(current.imageUrl);
   revalidatePath("/");
   revalidatePath("/projects");

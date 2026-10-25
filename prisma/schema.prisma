@@ -15,8 +15,6 @@ model Project {
   description         String   @default("")
   imageUrl            String?
   websiteUrl          String
-  websiteButtonTextAr String   @default("")
-  websiteButtonTextEn String   @default("")
   githubUrl           String?
   category            String   @default("Web App")
   technologies        String   @default("[]")

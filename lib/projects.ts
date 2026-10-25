@@ -9,8 +9,6 @@ type DbProject = {
   description: string;
   imageUrl: string | null;
   websiteUrl: string;
-  websiteButtonTextAr: string;
-  websiteButtonTextEn: string;
   githubUrl: string | null;
   category: string;
   technologies: string;
@@ -68,8 +66,8 @@ export function mapProject(row: any): Project {
     description: r.description,
     imageUrl: r.imageUrl,
     websiteUrl: r.websiteUrl,
-    websiteButtonTextAr: r.websiteButtonTextAr ?? "",
-    websiteButtonTextEn: r.websiteButtonTextEn ?? "",
+    websiteButtonTextAr: "",
+    websiteButtonTextEn: "",
     githubUrl: r.githubUrl,
     category: r.category,
     technologies: parseStringArray(r.technologies ?? "[]"),
@@ -92,35 +90,65 @@ export function mapProject(row: any): Project {
   };
 }
 
+export function getProjectButtonTextSettingKeys(projectId: string) {
+  return {
+    ar: `projectButtonText:${projectId}:ar`,
+    en: `projectButtonText:${projectId}:en`,
+  };
+}
+
+async function attachProjectButtonTexts(projects: Project[]): Promise<Project[]> {
+  if (projects.length === 0) return projects;
+
+  const keysByProject = new Map(
+    projects.map((project) => [project.id, getProjectButtonTextSettingKeys(project.id)]),
+  );
+  const settingKeys = Array.from(keysByProject.values()).flatMap((keys) => [keys.ar, keys.en]);
+  const settings = await prisma.siteSetting.findMany({
+    where: { key: { in: settingKeys } },
+    select: { key: true, value: true },
+  });
+  const values = new Map(settings.map((setting) => [setting.key, setting.value]));
+
+  return projects.map((project) => {
+    const keys = keysByProject.get(project.id)!;
+    return {
+      ...project,
+      websiteButtonTextAr: values.get(keys.ar) ?? "",
+      websiteButtonTextEn: values.get(keys.en) ?? "",
+    };
+  });
+}
+
 export async function getPublishedProjects(): Promise<Project[]> {
   const rows = await prisma.project.findMany({
     where: { status: "PUBLISHED" },
     orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
   });
-  return rows.map(mapProject);
+  return attachProjectButtonTexts(rows.map(mapProject));
 }
 
 export async function getAllProjects(): Promise<Project[]> {
   const rows = await prisma.project.findMany({
     orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
   });
-  return rows.map(mapProject);
+  return attachProjectButtonTexts(rows.map(mapProject));
 }
 
 export async function getProjectBySlug(slug: string): Promise<Project | null> {
   const row = await prisma.project.findUnique({ where: { slug } });
-  return row ? mapProject(row) : null;
+  return row ? (await attachProjectButtonTexts([mapProject(row)]))[0] : null;
 }
 
 export async function getPublishedProjectBySlug(slug: string): Promise<Project | null> {
   const row = await prisma.project.findUnique({ where: { slug } });
   if (!row || row.status !== "PUBLISHED") return null;
-  return mapProject(row);
+  return (await attachProjectButtonTexts([mapProject(row)]))[0];
 }
 
 export async function getProjectById(id: string): Promise<Project | null> {
   const row = await prisma.project.findUnique({ where: { id } });
-  return row ? mapProject(row) : null;
+  return row ? (await attachProjectButtonTexts([mapProject(row)]))[0] : null;
 }
 
 export async function getDashboardStats() {
