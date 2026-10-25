@@ -49,7 +49,7 @@ export function ProjectEditor({
   const [uploadError, setUploadError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
   const dirtyRef = useRef(isNew);
-  const initialJson = useMemo(() => JSON.stringify(initial), [initial]);
+  const savedFormJsonRef = useRef(isNew ? "" : JSON.stringify(initial));
 
   const vMessages: ValidationMessages = useMemo(
     () => ({
@@ -120,8 +120,8 @@ export function ProjectEditor({
   }, []);
 
   useEffect(() => {
-    dirtyRef.current = JSON.stringify({ ...form }) !== initialJson ? true : isNew ? true : saveState === "unsaved";
-  }, [form, initialJson, isNew, saveState]);
+    dirtyRef.current = JSON.stringify(form) !== savedFormJsonRef.current;
+  }, [form]);
 
   function handleNameChange(name: string) {
     setForm((f) => ({
@@ -231,6 +231,9 @@ export function ProjectEditor({
         setSaveState("error");
         return false;
       }
+      const savedForm = { ...form, status: statusOverride ?? form.status };
+      savedFormJsonRef.current = JSON.stringify(savedForm);
+      if (savedForm.status !== form.status) setForm(savedForm);
       setSaveState("saved");
       dirtyRef.current = false;
       setMessage(statusOverride === "PUBLISHED" ? t("publishedMsg") : t("savedMsg"));
@@ -502,8 +505,8 @@ export function ProjectEditor({
           </section>
 
           <div className="flex flex-wrap gap-2 border-t border-gray-100 pt-5 dark:border-gray-800">
-            <Button type="button" variant="secondary" onClick={() => void save("DRAFT")}>
-              <Save className="h-4 w-4" aria-hidden /> {t("saveDraft")}
+            <Button type="button" variant="secondary" onClick={() => void save()}>
+              <Save className="h-4 w-4" aria-hidden /> {t(form.status === "PUBLISHED" ? "saveChanges" : "saveDraft")}
             </Button>
             {form.status === "PUBLISHED" ? (
               <Button type="button" variant="secondary" onClick={() => void save("DRAFT")}>
